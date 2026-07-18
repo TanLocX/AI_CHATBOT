@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -23,12 +23,18 @@ namespace SEMI_FINAL
 
         public OllamaService(string baseUrl = "http://localhost:11434", string model = "llama3.2")
         {
-            _baseUrl = baseUrl;
+            _baseUrl = baseUrl.TrimEnd('/');
             _model = model;
 
             // Timeout 3 phút — AI đôi khi trả lời lâu
             _httpClient.Timeout = TimeSpan.FromMinutes(3);
         }
+
+        /// <summary>
+        /// Đổi địa chỉ máy chủ Ollama (Dùng khi kết nối Ollama trên máy khác trong mạng LAN)
+        /// Ví dụ: SetBaseUrl("http://192.168.1.100:11434")
+        /// </summary>
+        public void SetBaseUrl(string baseUrl) => _baseUrl = baseUrl.TrimEnd('/');
 
         /// <summary>
         /// Đổi model đang dùng (ví dụ: llama3, mistral, gemma...)

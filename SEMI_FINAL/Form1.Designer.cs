@@ -1,4 +1,4 @@
-﻿namespace SEMI_FINAL
+namespace SEMI_FINAL
 {
     partial class Form1
     {
@@ -34,6 +34,7 @@
             this.guna2VScrollBar1 = new Guna.UI2.WinForms.Guna2VScrollBar();
             this.txtInput = new Guna.UI2.WinForms.Guna2TextBox();
             this.btnSend = new Guna.UI2.WinForms.Guna2Button();
+            this.btnOcr = new Guna.UI2.WinForms.Guna2Button();
             this.pnlChat.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -48,6 +49,7 @@
             // 
             // pnlChat
             // 
+            this.pnlChat.Controls.Add(this.btnOcr);
             this.pnlChat.Controls.Add(this.btnSend);
             this.pnlChat.Controls.Add(this.txtInput);
             this.pnlChat.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -109,10 +111,10 @@
             this.txtInput.TextChanged += new System.EventHandler(this.guna2TextBox1_TextChanged);
             this.txtInput.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtInput_KeyDown);
             // 
+            // 
             // btnSend
             // 
-            this.btnSend.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnSend.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnSend.BackColor = System.Drawing.Color.Silver;
             this.btnSend.BorderRadius = 20;
             this.btnSend.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
@@ -121,13 +123,28 @@
             this.btnSend.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
             this.btnSend.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnSend.ForeColor = System.Drawing.Color.White;
-            this.btnSend.Location = new System.Drawing.Point(831, 18);
+            this.btnSend.Location = new System.Drawing.Point(822, 18);
             this.btnSend.Name = "btnSend";
-            this.btnSend.Size = new System.Drawing.Size(79, 38);
+            this.btnSend.Size = new System.Drawing.Size(75, 38);
             this.btnSend.TabIndex = 2;
             this.btnSend.Text = "GỬI";
             this.btnSend.Click += new System.EventHandler(this.btnSend_Click);
             this.btnSend.KeyDown += new System.Windows.Forms.KeyEventHandler(this.btnSend_KeyDown);
+            // 
+            // btnOcr
+            // 
+            this.btnOcr.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnOcr.BackColor = System.Drawing.Color.Silver;
+            this.btnOcr.BorderRadius = 20;
+            this.btnOcr.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.btnOcr.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnOcr.ForeColor = System.Drawing.Color.White;
+            this.btnOcr.Location = new System.Drawing.Point(905, 18);
+            this.btnOcr.Name = "btnOcr";
+            this.btnOcr.Size = new System.Drawing.Size(88, 38);
+            this.btnOcr.TabIndex = 3;
+            this.btnOcr.Text = "➕ File";
+            this.btnOcr.Click += new System.EventHandler(this.btnOcr_Click);
             // 
             // Form1
             // 
@@ -153,6 +170,7 @@
         private Guna.UI2.WinForms.Guna2VScrollBar guna2VScrollBar1;
         private Guna.UI2.WinForms.Guna2TextBox txtInput;
         private Guna.UI2.WinForms.Guna2Button btnSend;
+        private Guna.UI2.WinForms.Guna2Button btnOcr;
     }
 }
 
