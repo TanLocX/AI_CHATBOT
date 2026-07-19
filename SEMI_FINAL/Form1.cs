@@ -1,5 +1,7 @@
 using System;
+using System.Diagnostics;
 using System.Drawing;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace SEMI_FINAL
@@ -7,8 +9,8 @@ namespace SEMI_FINAL
     public partial class Form1 : Form
     {
         // Khởi tạo service kết nối Ollama.
-        // Khởi tạo service kết nối Ollama (Kết nối qua máy từ xa qua ZeroTier IP 192.168.193.10)
-        private OllamaService _ollamaService = new OllamaService("http://192.168.193.10:11434", "llama3.2");
+        // Đổi lại localhost vì IP 192.168.193.10 là máy của bạn khác (ZeroTier), không dùng được trên máy này
+        private OllamaService _ollamaService = new OllamaService("http://localhost:11434", "llama3.2");
         private OcrService _ocrService = new OcrService();
         private DocumentReaderService _docService;
         private string _fileDinhKemTen = null;
@@ -21,15 +23,114 @@ namespace SEMI_FINAL
             this.Text = "AI Chat Assistant";
             _docService = new DocumentReaderService(_ocrService);
 
-            // ✅ Thêm dòng này — cho phép nhấn Enter trong ô nhập
+            // ✅ Cho phép nhấn Enter trong ô nhập
             txtInput.KeyDown += txtInput_KeyDown;
 
-            KiemTraKetNoiOllama();
+            TuDongKhoiDongOllama();  // Tự khởi động Ollama nếu chưa chạy
         }
 
         /// <summary>
-        /// Kiểm tra và hiển thị trạng thái kết nối Ollama
+        /// Tự động khởi động Ollama nếu chưa chạy, sau đó kiểm tra kết nối và load models
         /// </summary>
+        private async void TuDongKhoiDongOllama()
+        {
+            // Kiểm tra Ollama đã chạy chưa
+            bool dangChay = await _ollamaService.KiemTraKetNoi();
+
+            if (!dangChay)
+            {
+                // Tìm tiến trình ollama đang chạy không
+                var processes = Process.GetProcessesByName("ollama");
+                if (processes.Length == 0)
+                {
+                    try
+                    {
+                        // Khởi động ollama serve ngầm (không hiện cửa sổ CMD)
+                        var psi = new ProcessStartInfo()
+                        {
+                            FileName = "ollama",
+                            Arguments = "serve",
+                            UseShellExecute = false,
+                            CreateNoWindow = true,   // Ẩn hoàn toàn, không hiện CMD
+                            WindowStyle = ProcessWindowStyle.Hidden
+                        };
+                        Process.Start(psi);
+
+                        // Chờ Ollama khởi động xong (~3 giây)
+                        await Task.Delay(3000);
+                    }
+                    catch
+                    {
+                        // Nếu không tự start được, hiện hướng dẫn thủ công
+                        MessageBox.Show(
+                            "Không thể tự khởi động Ollama.\n\n" +
+                            "Hãy mở Command Prompt và chạy:\n" +
+                            "   ollama serve\n\n" +
+                            "Sau đó khởi động lại ứng dụng.",
+                            "Ollama chưa chạy",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning);
+                        return;
+                    }
+                }
+                else
+                {
+                    // Tiến trình ollama tồn tại nhưng chưa sẵn sàng, chờ thêm
+                    await Task.Delay(2000);
+                }
+            }
+
+            // Sau khi Ollama đã chạy, kiểm tra kết nối và load models
+            KiemTraKetNoiOllama();
+            TaiDanhSachModel();
+        }
+
+        /// <summary>
+        /// Tự động tải danh sách model từ Ollama và đổ vào ComboBox
+        /// </summary>
+        private async void TaiDanhSachModel()
+        {
+            guna2ComboBox1.Enabled = false;
+            guna2ComboBox1.Items.Clear();
+            guna2ComboBox1.Items.Add("⏳ Đang tải...");
+            guna2ComboBox1.SelectedIndex = 0;
+
+            var models = await _ollamaService.LayDanhSachModel();
+
+            guna2ComboBox1.Items.Clear();
+
+            if (models.Count == 0)
+            {
+                guna2ComboBox1.Items.Add("(Không tìm thấy model)");
+                guna2ComboBox1.SelectedIndex = 0;
+                guna2ComboBox1.Enabled = false;
+                return;
+            }
+
+            foreach (var m in models)
+                guna2ComboBox1.Items.Add(m);
+
+            // Chọn model đang dùng nếu có trong danh sách
+            string currentModel = "llama3.2";
+            int idx = models.FindIndex(m => m.StartsWith(currentModel));
+            guna2ComboBox1.SelectedIndex = idx >= 0 ? idx : 0;
+
+            guna2ComboBox1.Enabled = true;
+        }
+
+        /// <summary>
+        /// Xử lý khi người dùng chọn model khác trong ComboBox
+        /// </summary>
+        private void cboModel_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string selected = guna2ComboBox1.SelectedItem?.ToString();
+            if (string.IsNullOrEmpty(selected) || selected.StartsWith("(") || selected.StartsWith("⏳"))
+                return;
+
+            _ollamaService.SetModel(selected);
+            ThemTinNhan($"🤖 Đã chuyển sang model: {selected}", false);
+        }
+
         private async void KiemTraKetNoiOllama()
         {
             bool ketNoi = await _ollamaService.KiemTraKetNoi();
@@ -76,7 +177,7 @@ namespace SEMI_FINAL
         private Control ThemTinNhan(string noiDung, bool laNguoiDung)
         {
             int maxWidth = pnlMain.Width - 80;
-            var font     = new Font("Segoe UI", 10);
+            var font     = new Font("Google Sans", 12);
             int padH     = 24; // padding trái + phải (12 + 12)
 
             // Dùng TextRenderer để đo sơ bộ kích thước
@@ -94,8 +195,8 @@ namespace SEMI_FINAL
             // Tạo Panel chứa bong bóng tin nhắn
             Guna.UI2.WinForms.Guna2Panel bubblePanel = new Guna.UI2.WinForms.Guna2Panel();
             bubblePanel.BorderRadius = 12;
-            Color bgColor = laNguoiDung ? Color.DodgerBlue : Color.FromArgb(235, 235, 235);
-            Color fgColor = laNguoiDung ? Color.White : Color.Black;
+            Color bgColor = laNguoiDung ? Color.FromArgb(99, 102, 241) : Color.FromArgb(39, 39, 42);
+            Color fgColor = laNguoiDung ? Color.White : Color.FromArgb(228, 228, 231);
             bubblePanel.FillColor = bgColor;
             bubblePanel.BackColor = Color.Transparent;
 
@@ -376,6 +477,16 @@ namespace SEMI_FINAL
                 e.SuppressKeyPress = true;
                 btnSend_Click(this, new EventArgs());
             }
+        }
+
+        private void pnlSizebar_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
