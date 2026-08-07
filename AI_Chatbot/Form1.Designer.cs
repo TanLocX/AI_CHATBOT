@@ -29,7 +29,7 @@ namespace SEMI_FINAL
         private void InitializeComponent()
         {
             this.pnlSizebar = new Guna.UI2.WinForms.Guna2Panel();
-            this.guna2ComboBox1 = new Guna.UI2.WinForms.Guna2ComboBox();
+            this.cb_model = new Guna.UI2.WinForms.Guna2ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.guna2CirclePictureBox1 = new Guna.UI2.WinForms.Guna2CirclePictureBox();
             this.guna2Button1 = new Guna.UI2.WinForms.Guna2Button();
@@ -47,7 +47,7 @@ namespace SEMI_FINAL
             // 
             // pnlSizebar
             // 
-            this.pnlSizebar.Controls.Add(this.guna2ComboBox1);
+            this.pnlSizebar.Controls.Add(this.cb_model);
             this.pnlSizebar.Controls.Add(this.label2);
             this.pnlSizebar.Controls.Add(this.label1);
             this.pnlSizebar.Controls.Add(this.guna2CirclePictureBox1);
@@ -60,22 +60,22 @@ namespace SEMI_FINAL
             this.pnlSizebar.TabIndex = 0;
             this.pnlSizebar.Paint += new System.Windows.Forms.PaintEventHandler(this.pnlSizebar_Paint);
             // 
-            // guna2ComboBox1
+            // cb_model
             // 
-            this.guna2ComboBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(24)))), ((int)(((byte)(24)))), ((int)(((byte)(27)))));
-            this.guna2ComboBox1.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
-            this.guna2ComboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.guna2ComboBox1.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(39)))), ((int)(((byte)(39)))), ((int)(((byte)(42)))));
-            this.guna2ComboBox1.FocusedColor = System.Drawing.Color.FromArgb(((int)(((byte)(99)))), ((int)(((byte)(102)))), ((int)(((byte)(241)))));
-            this.guna2ComboBox1.FocusedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(99)))), ((int)(((byte)(102)))), ((int)(((byte)(241)))));
-            this.guna2ComboBox1.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.guna2ComboBox1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(228)))), ((int)(((byte)(228)))), ((int)(((byte)(231)))));
-            this.guna2ComboBox1.ItemHeight = 28;
-            this.guna2ComboBox1.Location = new System.Drawing.Point(16, 136);
-            this.guna2ComboBox1.Name = "guna2ComboBox1";
-            this.guna2ComboBox1.Size = new System.Drawing.Size(145, 34);
-            this.guna2ComboBox1.TabIndex = 7;
-            this.guna2ComboBox1.SelectedIndexChanged += new System.EventHandler(this.cboModel_SelectedIndexChanged);
+            this.cb_model.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(24)))), ((int)(((byte)(24)))), ((int)(((byte)(27)))));
+            this.cb_model.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.cb_model.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cb_model.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(39)))), ((int)(((byte)(39)))), ((int)(((byte)(42)))));
+            this.cb_model.FocusedColor = System.Drawing.Color.FromArgb(((int)(((byte)(99)))), ((int)(((byte)(102)))), ((int)(((byte)(241)))));
+            this.cb_model.FocusedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(99)))), ((int)(((byte)(102)))), ((int)(((byte)(241)))));
+            this.cb_model.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.cb_model.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(228)))), ((int)(((byte)(228)))), ((int)(((byte)(231)))));
+            this.cb_model.ItemHeight = 28;
+            this.cb_model.Location = new System.Drawing.Point(16, 136);
+            this.cb_model.Name = "cb_model";
+            this.cb_model.Size = new System.Drawing.Size(145, 34);
+            this.cb_model.TabIndex = 7;
+            this.cb_model.SelectedIndexChanged += new System.EventHandler(this.cboModel_SelectedIndexChanged);
             // 
             // label1
             // 
@@ -196,8 +196,7 @@ namespace SEMI_FINAL
             this.txtInput.PlaceholderText = "Nhập câu hỏi của bạn...";
             this.txtInput.SelectedText = "";
             this.txtInput.Size = new System.Drawing.Size(658, 45);
-            this.txtInput.TabIndex = 0;
-            this.txtInput.TextChanged += new System.EventHandler(this.guna2TextBox1_TextChanged);
+            this.txtInput.TabIndex = 2;
             this.txtInput.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtInput_KeyDown);
             // 
             // pnlMain
@@ -208,8 +207,7 @@ namespace SEMI_FINAL
             this.pnlMain.Location = new System.Drawing.Point(175, 0);
             this.pnlMain.Name = "pnlMain";
             this.pnlMain.Size = new System.Drawing.Size(1011, 547);
-            this.pnlMain.TabIndex = 2;
-            this.pnlMain.Paint += new System.Windows.Forms.PaintEventHandler(this.pnlMain_Paint);
+            this.pnlMain.TabIndex = 3;
             // 
             // guna2VScrollBar1
             // 
@@ -270,7 +268,7 @@ namespace SEMI_FINAL
         private Guna.UI2.WinForms.Guna2Button guna2Button1;
         private Guna.UI2.WinForms.Guna2CirclePictureBox guna2CirclePictureBox1;
         private System.Windows.Forms.Label label1;
-        private Guna.UI2.WinForms.Guna2ComboBox guna2ComboBox1;
+        private Guna.UI2.WinForms.Guna2ComboBox cb_model;
         private System.Windows.Forms.Label label2;
     }
 }
