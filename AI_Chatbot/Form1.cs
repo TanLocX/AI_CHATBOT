@@ -32,7 +32,8 @@ namespace SEMI_FINAL // Bắt đầu namespace của ứng dụng
         public Form1() // Hàm khởi tạo UI của Form1
         {
             InitializeComponent(); // Gọi hàm tự sinh của WinForms để khởi tạo các control giao diện
-            this.Text = "AI Chat Assistant"; // Set tiêu đề cho cửa sổ ứng dụng
+            this.Text = "FluentChat AI Studio - Desktop Assistant"; // Set tiêu đề cho cửa sổ ứng dụng
+            this.StartPosition = FormStartPosition.CenterScreen;
             _docService = new DocumentReaderService(); // Cấp phát bộ nhớ khởi tạo DocumentReaderService
             _ocrService = new OcrService(); // Cấp phát bộ nhớ khởi tạo OcrService
 
@@ -247,13 +248,13 @@ namespace SEMI_FINAL // Bắt đầu namespace của ứng dụng
 
             Guna.UI2.WinForms.Guna2Panel bubblePanel = new Guna.UI2.WinForms.Guna2Panel(); // Khởi tạo Panel bong bóng sử dụng GunaUI
             bubblePanel.BorderRadius = 14; // Bo tròn góc bong bóng 14px Fluent style
-            Color bgColor = laNguoiDung ? Color.FromArgb(0, 132, 255) : Color.FromArgb(24, 26, 34); // Nền: Gradient Xanh Stitch (#0084FF) hoặc Slate Dark (#181A22)
-            Color fgColor = laNguoiDung ? Color.White : Color.FromArgb(235, 238, 245); // Màu chữ tương ứng
+            Color bgColor = laNguoiDung ? Color.FromArgb(0, 120, 212) : Color.FromArgb(18, 18, 20); // Nền: Xanh Stitch (#0078D4 - Người dùng) hoặc Đen nhám (#121214 - AI)
+            Color fgColor = Color.White; // Màu chữ trắng thuần tương phản cao
             bubblePanel.FillColor = bgColor; // Đổ màu nền cho Guna Panel
             bubblePanel.BackColor = Color.Transparent; // Đặt nền viền trong suốt
             if (!laNguoiDung)
             {
-                bubblePanel.BorderColor = Color.FromArgb(45, 50, 65);
+                bubblePanel.BorderColor = Color.FromArgb(40, 40, 45);
                 bubblePanel.BorderThickness = 1;
             }
 
