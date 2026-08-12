@@ -39,3 +39,10 @@ $RECYCLE.BIN/
 # Rider
 .idea/
 *.sln.iml
+
+# Ollama Local Data & Models (Do not commit gigabytes of AI models)
+ollama_data/
+SEMI_FINAL/ollama_data/
+*.gguf
+ollama.exe
+

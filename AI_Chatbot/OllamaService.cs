@@ -10,7 +10,7 @@ using System.IO; // Cung cấp truy cập I/O hệ thống file
 
 namespace SEMI_FINAL // Namespace nhóm các class trong project lại
 {
-    internal class OllamaService // Khai báo class OllamaService ở mức nội bộ project
+    public class OllamaService // Khai báo class OllamaService public
     {
         private static readonly HttpClient _httpClient = new HttpClient(); // Dùng chung 1 HttpClient (Best practice để tránh tràn socket)
 
@@ -124,6 +124,48 @@ namespace SEMI_FINAL // Namespace nhóm các class trong project lại
             catch (HttpRequestException ex) // Bắt lỗi mạng hoặc server đóng kết nối
             {
                 throw new Exception($"Không thể kết nối Ollama ({_baseUrl}).\nNguyên nhân: {ex.Message}\n\nGợi ý: Ollama đang load model mới — hãy chờ 10-30 giây rồi thử lại."); // Thông báo và gợi ý
+            }
+        }
+
+        public async Task PullModel(string modelName, Action<long, long, string> onProgress, System.Threading.CancellationToken cancellationToken = default)
+        {
+            var requestBody = new { name = modelName, stream = true };
+            string jsonBody = JsonConvert.SerializeObject(requestBody);
+            
+            var request = new HttpRequestMessage(HttpMethod.Post, $"{_baseUrl}/api/pull")
+            {
+                Content = new StringContent(jsonBody, Encoding.UTF8, "application/json")
+            };
+
+            using (var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken))
+            {
+                if (!response.IsSuccessStatusCode)
+                {
+                    string err = await response.Content.ReadAsStringAsync();
+                    throw new Exception($"Không thể tải model '{modelName}': {err}");
+                }
+
+                using (var stream = await response.Content.ReadAsStreamAsync())
+                using (var reader = new System.IO.StreamReader(stream))
+                {
+                    string line;
+                    while ((line = await reader.ReadLineAsync()) != null)
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        if (string.IsNullOrWhiteSpace(line)) continue;
+
+                        try
+                        {
+                            var obj = JObject.Parse(line);
+                            string status = obj["status"]?.ToString() ?? "";
+                            long completed = (long?)obj["completed"] ?? 0L;
+                            long total = (long?)obj["total"] ?? 0L;
+
+                            onProgress?.Invoke(completed, total, status);
+                        }
+                        catch { }
+                    }
+                }
             }
         }
     }

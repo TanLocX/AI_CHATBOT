@@ -109,7 +109,8 @@ namespace SEMI_FINAL // Bắt đầu namespace của ứng dụng
 
             if (models.Count == 0) // Nếu không tìm thấy model nào
             {
-                cb_model.Items.Add("(Không tìm thấy Ollama model)"); // Thêm dòng báo lỗi không có model
+                cb_model.Items.Add("(Chưa có model Local - Click để tải)"); // Báo chưa có model
+                ThemTinNhan("⚠️ Hệ thống chưa tìm thấy Model Local nào trên Ollama.\n👉 Bấm vào nút [📥 Tải Model Local] ở góc dưới bên trái để tải mô hình về máy (ví dụ: llama3.2).", false);
             }
             else // Nếu có model
             {
@@ -129,19 +130,67 @@ namespace SEMI_FINAL // Bắt đầu namespace của ứng dụng
         private void cboModel_SelectedIndexChanged(object sender, EventArgs e) // Sự kiện khi người dùng đổi model trong combobox
         {
             string selected = cb_model.SelectedItem?.ToString(); // Lấy tên model vừa được chọn
-            if (string.IsNullOrEmpty(selected) || selected.StartsWith("(") || selected.StartsWith("⏳")) // Bỏ qua nếu là placeholder hoặc lỗi
+            if (string.IsNullOrEmpty(selected) || selected.StartsWith("⏳")) // Bỏ qua nếu là placeholder
                 return; // Thoát hàm
 
-            if (selected == "Gemini 2.5 Flash") // Nếu người dùng chọn model Gemini
+            if (selected.StartsWith("(Chưa có model"))
+            {
+                HienThiDialogTaiModel();
+                return;
+            }
+
+            if (selected == "Gemini 2.5 Flash" || selected.StartsWith("Gemini")) // Nếu người dùng chọn model Gemini
             {
                 _isGeminiSelected = true; // Đổi cờ Gemini thành true
-                ThemTinNhan($"🤖 Đã chuyển sang model: {selected}", false); // In thông báo hệ thống ra màn hình chat
+                
+                if (!_geminiService.HasKey)
+                {
+                    ThemTinNhan("⚠️ Bạn chưa cấu hình Gemini API Key! Bấm vào nút [🔑 Cấu hình API Key] ở góc dưới bên trái để nhập Key.", false);
+                    HienThiDialogNhapApiKey(true);
+                }
+                else
+                {
+                    ThemTinNhan($"🤖 Đã chuyển sang model: {selected}", false); // In thông báo hệ thống ra màn hình chat
+                }
             }
             else // Nếu chọn model khác (thuộc Ollama)
             {
                 _isGeminiSelected = false; // Đổi cờ Gemini thành false
                 _ollamaService.SetModel(selected); // Cập nhật tên model vào cấu hình của Ollama Service
                 ThemTinNhan($"🤖 Đã chuyển sang model: {selected}", false); // In thông báo chuyển model thành công
+            }
+        }
+
+        private void btnDownloadModel_Click(object sender, EventArgs e)
+        {
+            HienThiDialogTaiModel();
+        }
+
+        private void HienThiDialogTaiModel()
+        {
+            using (FormDownloadModelDialog dlg = new FormDownloadModelDialog(_ollamaService))
+            {
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    TaiDanhSachModel(); // Refresh lại danh sách model sau khi tải xong
+                }
+            }
+        }
+
+        private void btnApiKey_Click(object sender, EventArgs e)
+        {
+            HienThiDialogNhapApiKey(false);
+        }
+
+        private void HienThiDialogNhapApiKey(bool fromAutoPrompt)
+        {
+            using (FormApiKeyDialog dlg = new FormApiKeyDialog(_geminiService.ApiKey))
+            {
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    _geminiService.SetApiKey(dlg.ApiKey);
+                    ThemTinNhan("✅ Đã cập nhật Gemini API Key thành công!", false);
+                }
             }
         }
 
@@ -197,36 +246,41 @@ namespace SEMI_FINAL // Bắt đầu namespace của ứng dụng
             int rtbHeight = textSize.Height + 10; // Chiều cao TextBox bên trong
 
             Guna.UI2.WinForms.Guna2Panel bubblePanel = new Guna.UI2.WinForms.Guna2Panel(); // Khởi tạo Panel bong bóng sử dụng GunaUI
-            bubblePanel.BorderRadius = 12; // Bo tròn góc bong bóng 12px
-            Color bgColor = laNguoiDung ? Color.FromArgb(99, 102, 241) : Color.FromArgb(39, 39, 42); // Màu nền: Xanh (Người dùng) hoặc Đen nhạt (AI)
-            Color fgColor = laNguoiDung ? Color.White : Color.FromArgb(228, 228, 231); // Màu chữ tương ứng với nền
+            bubblePanel.BorderRadius = 14; // Bo tròn góc bong bóng 14px Fluent style
+            Color bgColor = laNguoiDung ? Color.FromArgb(0, 132, 255) : Color.FromArgb(24, 26, 34); // Nền: Gradient Xanh Stitch (#0084FF) hoặc Slate Dark (#181A22)
+            Color fgColor = laNguoiDung ? Color.White : Color.FromArgb(235, 238, 245); // Màu chữ tương ứng
             bubblePanel.FillColor = bgColor; // Đổ màu nền cho Guna Panel
-            bubblePanel.BackColor = Color.Transparent; // Đặt nền viền trong suốt để không bị lẹm góc
+            bubblePanel.BackColor = Color.Transparent; // Đặt nền viền trong suốt
+            if (!laNguoiDung)
+            {
+                bubblePanel.BorderColor = Color.FromArgb(45, 50, 65);
+                bubblePanel.BorderThickness = 1;
+            }
 
-            RichTextBox rtb = new RichTextBox(); // Khởi tạo RichTextBox để chứa chữ và định dạng màu mè
+            RichTextBox rtb = new RichTextBox(); // Khởi tạo RichTextBox để chứa chữ
             rtb.Font = font; // Set font
             rtb.ReadOnly = true; // Chặn người dùng sửa nội dung
             rtb.BorderStyle = BorderStyle.None; // Xóa viền của RichTextBox
             rtb.BackColor = bgColor; // Đồng bộ màu nền
             rtb.ForeColor = fgColor; // Đồng bộ màu chữ
-            rtb.ScrollBars = RichTextBoxScrollBars.None; // Tắt thanh cuộn để nó giãn nở tự động
-            rtb.Location = new Point(12, 12); // Đặt vị trí text bên trong panel (padding top/left 12)
-            rtb.Size = new Size(rtbWidth, rtbHeight); // Cấp kích thước đã tính toán cho RichTextBox
+            rtb.ScrollBars = RichTextBoxScrollBars.None; // Tắt thanh cuộn
+            rtb.Location = new Point(12, 12); // Đặt vị trí text bên trong panel
+            rtb.Size = new Size(rtbWidth, rtbHeight);
             
-            ApplyMarkdown(rtb, noiDung); // Gọi hàm custom để parse định dạng In đậm, In nghiêng, Code...
+            ApplyMarkdown(rtb, noiDung); // Parse định dạng Markdown
 
-            Button btnCopy = null; // Khởi tạo biến chứa nút Copy
+            Button btnCopy = null; // Khởi tạo nút Copy
             if (!laNguoiDung) // Chỉ tạo nút Copy nếu là tin nhắn của AI
             {
                 btnCopy = new Button(); // Tạo Button mới
                 btnCopy.Text = "📋 Sao chép"; // Gán nhãn cho nút
-                btnCopy.Font = new Font("Segoe UI", 8.5f, FontStyle.Semibold); // Set font nhỏ và semibold cho nút
-                btnCopy.Size = new Size(95, 26); // Set kích thước nút
+                btnCopy.Font = new Font("Segoe UI", 8.5f, FontStyle.Bold); // Set font nhỏ và bold
+                btnCopy.Size = new Size(95, 26); // Kích thước nút
                 btnCopy.FlatStyle = FlatStyle.Flat; // Set kiểu nút phẳng
                 btnCopy.FlatAppearance.BorderSize = 0; // Bỏ viền nút
-                btnCopy.BackColor = Color.FromArgb(215, 215, 215); // Màu nền nút xám nhạt
-                btnCopy.ForeColor = Color.FromArgb(50, 50, 50); // Màu chữ nút xám đậm
-                btnCopy.Cursor = Cursors.Hand; // Đổi con trỏ chuột thành hình bàn tay khi hover
+                btnCopy.BackColor = Color.FromArgb(50, 50, 50); // Màu nền nút xám Stitch
+                btnCopy.ForeColor = Color.FromArgb(220, 220, 220); // Màu chữ xám sáng
+                btnCopy.Cursor = Cursors.Hand; // Con trỏ chuột hình bàn tay
                 btnCopy.Location = new Point(12, rtb.Bottom + 6); // Đặt vị trí ngay dưới RichTextBox
 
                 btnCopy.Click += (s, e) => { // Định nghĩa sự kiện khi click vào nút Copy
@@ -553,6 +607,17 @@ namespace SEMI_FINAL // Bắt đầu namespace của ứng dụng
                 string traLoi = ""; // Biến chứa hồi đáp của AI
                 if (_isGeminiSelected) // Nếu model chọn là Google Gemini
                 {
+                    if (!_geminiService.HasKey)
+                    {
+                        if (lblIndicator != null && pnlMain.Controls.Contains(lblIndicator))
+                        {
+                            pnlMain.Controls.Remove(lblIndicator);
+                            lblIndicator.Dispose();
+                        }
+                        ThemTinNhan("⚠️ Vui lòng nhập Gemini API Key để gửi tin nhắn!", false);
+                        HienThiDialogNhapApiKey(true);
+                        return;
+                    }
                     traLoi = await _geminiService.GuiTinNhan(cauHoiGuiAI, imagePath); // Đẩy yêu cầu qua internet tới Google API
                 }
                 else // Nếu model là Local (Llama, mistral...)

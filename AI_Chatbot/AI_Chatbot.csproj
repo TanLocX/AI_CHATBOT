@@ -135,6 +135,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DocumentReaderService.cs" />
+    <Compile Include="FormApiKeyDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormDownloadModelDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="GeminiService.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>

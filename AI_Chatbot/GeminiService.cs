@@ -11,12 +11,25 @@ namespace SEMI_FINAL // Phạm vi chung của toàn bộ class trong dự án
     public class GeminiService // Định nghĩa lớp công khai để giao tiếp với AI Gemini
     {
         private static readonly HttpClient _httpClient = new HttpClient(); // Khởi tạo một thể hiện tĩnh HttpClient để chia sẻ kết nối, tăng tốc độ gọi mạng
-        private readonly string _apiKey; // Khai báo chuỗi lưu trữ API Key để xác thực tài khoản Google
+        private string _apiKey; // Khai báo chuỗi lưu trữ API Key để xác thực tài khoản Google
+
+        public string ApiKey
+        {
+            get => _apiKey;
+            set => _apiKey = value;
+        }
+
+        public bool HasKey => !string.IsNullOrWhiteSpace(_apiKey);
 
         public GeminiService(string apiKey) // Hàm tạo có nhận tham số là khóa API
         {
             _apiKey = apiKey; // Gán khóa được truyền vào cho trường _apiKey nội bộ
             _httpClient.Timeout = TimeSpan.FromMinutes(2); // Thiết lập thời gian chờ phản hồi tối đa của HTTP client lên 2 phút
+        }
+
+        public void SetApiKey(string newKey)
+        {
+            _apiKey = newKey;
         }
 
         public async Task<string> GuiTinNhan(string tinNhan, string imagePath = null) // Phương thức gửi câu hỏi dạng chuỗi và ảnh tùy chọn
@@ -26,7 +39,7 @@ namespace SEMI_FINAL // Phạm vi chung của toàn bộ class trong dự án
                 tinNhan = tinNhan.Substring(0, 30000) + "\n\n[... Nội dung đã bị cắt bớt do quá dài ...]"; // Trích xuất và giới hạn lại số lượng ký tự tối đa
             }
 
-            string url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + _apiKey; // Cấu trúc đường dẫn URL API Gemini gắn với khóa bí mật
+            string url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=" + _apiKey; // Cấu trúc đường dẫn URL API Gemini gắn với khóa bí mật
             
             object requestBody; // Khai báo đối tượng chứa các thành phần cấu trúc payload body
 
