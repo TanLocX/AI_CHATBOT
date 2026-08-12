@@ -7,13 +7,20 @@ using OfficeOpenXml; // Import thư viện EPPlus để thao tác file Excel
 using Newtonsoft.Json; // Import Newtonsoft để parse JSON
 using System.Collections.Generic; // Import Generic collections (List)
 using System.IO; // Import để thao tác file, path
+using System.Configuration; // Import để đọc cấu hình từ App.config
 
 namespace SEMI_FINAL // Bắt đầu namespace của ứng dụng
 {
     public partial class Form1 : System.Windows.Forms.Form // Khai báo class Form1 kế thừa từ Form
     {
-        private OllamaService _ollamaService = new OllamaService("http://localhost:11434", "llama3.2"); // Khởi tạo service kết nối Ollama local
-        private GeminiService _geminiService = new GeminiService("YOUR_API_KEY_HERE"); // Khởi tạo service kết nối Gemini API
+        private OllamaService _ollamaService = new OllamaService(
+            ConfigurationManager.AppSettings["OllamaBaseUrl"] ?? "http://localhost:11434",
+            ConfigurationManager.AppSettings["OllamaModel"] ?? "llama3.2"
+        ); // Đọc URL và Model từ App.config (có thể ghi đè bằng secrets.config)
+        
+        private GeminiService _geminiService = new GeminiService(
+            ConfigurationManager.AppSettings["GeminiApiKey"] ?? ""
+        ); // Đọc API Key từ App.config (ghi đè bằng secrets.config)
         private bool _isGeminiSelected = false; // Biến cờ đánh dấu xem người dùng đang chọn Gemini hay Ollama
         private DocumentReaderService _docService; // Khai báo biến trỏ đến service đọc file văn bản
         private OcrService _ocrService; // Khai báo biến trỏ đến service nhận diện chữ OCR
@@ -30,6 +37,15 @@ namespace SEMI_FINAL // Bắt đầu namespace của ứng dụng
             _ocrService = new OcrService(); // Cấp phát bộ nhớ khởi tạo OcrService
 
             txtInput.KeyDown += txtInput_KeyDown; // Gắn sự kiện nhấn phím (KeyDown) cho ô nhập liệu txtInput
+
+            // Load ảnh logo cho PictureBox bằng code (tránh lỗi Designer)
+            try
+            {
+                string imgPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "images.png"); // Đường dẫn ảnh trong thư mục Resources
+                if (File.Exists(imgPath)) // Kiểm tra file ảnh có tồn tại không
+                    guna2CirclePictureBox1.Image = Image.FromFile(imgPath); // Load ảnh từ file
+            }
+            catch { } // Bỏ qua nếu không tìm thấy ảnh - app vẫn chạy bình thường
 
             TuDongKhoiDongOllama(); // Gọi hàm kiểm tra và bật ngầm server Ollama nếu nó chưa chạy
         }
@@ -165,7 +181,7 @@ namespace SEMI_FINAL // Bắt đầu namespace của ứng dụng
         private Control ThemTinNhan(string noiDung, bool laNguoiDung) // Hàm tạo và render bong bóng chat
         {
             int maxWidth = pnlMain.Width - 80; // Giới hạn chiều rộng tối đa của tin nhắn để không sát viền
-            var font = new Font("Google Sans", 12); // Định nghĩa Font chữ cho tin nhắn
+            var font = new Font("Inter", 11.5f, FontStyle.Regular); // Định nghĩa Font chữ cho tin nhắn (Inter - font UI hiện đại từ Google Fonts)
             int padH = 24; // Tính padding ngang trái + phải (12px * 2)
 
             Size textSize = TextRenderer.MeasureText( // Tính toán kích thước thật của chuỗi dựa trên font
@@ -204,7 +220,7 @@ namespace SEMI_FINAL // Bắt đầu namespace của ứng dụng
             {
                 btnCopy = new Button(); // Tạo Button mới
                 btnCopy.Text = "📋 Sao chép"; // Gán nhãn cho nút
-                btnCopy.Font = new Font("Segoe UI", 8.5f, FontStyle.Bold); // Set font nhỏ và in đậm cho nút
+                btnCopy.Font = new Font("Segoe UI", 8.5f, FontStyle.Semibold); // Set font nhỏ và semibold cho nút
                 btnCopy.Size = new Size(95, 26); // Set kích thước nút
                 btnCopy.FlatStyle = FlatStyle.Flat; // Set kiểu nút phẳng
                 btnCopy.FlatAppearance.BorderSize = 0; // Bỏ viền nút
@@ -303,7 +319,7 @@ namespace SEMI_FINAL // Bắt đầu namespace của ứng dụng
 
                 if (isCode) // Nếu đang nằm trong block code
                 {
-                    AppendText(rtb, line + lineBreak, new Font("Consolas", 11, FontStyle.Regular), Color.FromArgb(235, 179, 52)); // Chèn text với font chữ coder, màu vàng
+                    AppendText(rtb, line + lineBreak, new Font("Cascadia Mono", 10.5f, FontStyle.Regular), Color.FromArgb(235, 179, 52)); // Chèn text với font code Cascadia Mono, màu vàng
                 }
                 else // Nếu là văn bản thường
                 {
@@ -364,7 +380,7 @@ namespace SEMI_FINAL // Bắt đầu namespace của ứng dụng
                     {
                         if (i > lastIndex) AppendText(rtb, line.Substring(lastIndex, i - lastIndex), rtb.Font, rtb.ForeColor); // Nhét text thường phía trước
                         string codeText = line.Substring(i + 1, end - i - 1); // Lấy chữ bên trong thẻ '`'
-                        AppendText(rtb, codeText, new Font("Consolas", rtb.Font.Size), Color.FromArgb(235, 179, 52)); // Chèn với font code và màu cam
+                        AppendText(rtb, codeText, new Font("Cascadia Mono", rtb.Font.Size), Color.FromArgb(235, 179, 52)); // Chèn với font code Cascadia Mono và màu cam
                         i = end + 1; // Vượt trỏ qua thẻ
                         lastIndex = i; // Reset mốc
                         continue; // Bỏ qua lệnh ở dưới đi tiếp

@@ -58,7 +58,6 @@ namespace SEMI_FINAL
             this.pnlSizebar.Name = "pnlSizebar";
             this.pnlSizebar.Size = new System.Drawing.Size(175, 656);
             this.pnlSizebar.TabIndex = 0;
-            this.pnlSizebar.Paint += new System.Windows.Forms.PaintEventHandler(this.pnlSizebar_Paint);
             // 
             // cb_model
             // 
@@ -94,8 +93,6 @@ namespace SEMI_FINAL
             this.guna2CirclePictureBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(24)))), ((int)(((byte)(24)))), ((int)(((byte)(27)))));
             this.guna2CirclePictureBox1.ErrorImage = null;
             this.guna2CirclePictureBox1.FillColor = System.Drawing.Color.Transparent;
-            this.guna2CirclePictureBox1.Image = global::SEMI_FINAL.Properties.Resources.images;
-            this.guna2CirclePictureBox1.ImageRotate = 0F;
             this.guna2CirclePictureBox1.InitialImage = null;
             this.guna2CirclePictureBox1.Location = new System.Drawing.Point(28, 28);
             this.guna2CirclePictureBox1.Name = "guna2CirclePictureBox1";
@@ -234,7 +231,6 @@ namespace SEMI_FINAL
             this.label2.Size = new System.Drawing.Size(48, 15);
             this.label2.TabIndex = 6;
             this.label2.Text = "Model: ";
-            this.label2.Click += new System.EventHandler(this.label2_Click);
             // 
             // Form1
             // 

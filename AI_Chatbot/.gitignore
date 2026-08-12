@@ -1,0 +1,19 @@
+# ===== Build output =====
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+
+# ===== Visual Studio =====
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# ===== NuGet =====
+packages/
+*.nupkg
+
+# ===== BÍ MẬT - KHÔNG PUSH LÊN GIT =====
+secrets.config
