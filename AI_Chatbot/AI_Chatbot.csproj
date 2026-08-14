@@ -134,6 +134,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChatMessage.cs" />
     <Compile Include="DocumentReaderService.cs" />
     <Compile Include="FormApiKeyDialog.cs">
       <SubType>Form</SubType>

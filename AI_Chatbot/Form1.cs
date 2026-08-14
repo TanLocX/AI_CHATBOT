@@ -28,6 +28,7 @@ namespace SEMI_FINAL // Bắt đầu namespace của ứng dụng
         private string _fileDinhKemNoiDung = null; // Biến lưu nội dung chữ trích xuất từ file đính kèm
         private string _fileDinhKemPath = null; // Biến lưu đường dẫn vật lý của file đính kèm
         private bool _dangChoAI = false; // Cờ khóa trạng thái để tránh spam gửi nhiều tin nhắn cùng lúc khi AI đang xử lý
+        private List<ChatMessage> _chatHistory = new List<ChatMessage>(); // Bộ nhớ ngữ cảnh cuộc trò chuyện
 
         public Form1() // Hàm khởi tạo UI của Form1
         {
@@ -38,6 +39,23 @@ namespace SEMI_FINAL // Bắt đầu namespace của ứng dụng
             _ocrService = new OcrService(); // Cấp phát bộ nhớ khởi tạo OcrService
 
             txtInput.KeyDown += txtInput_KeyDown; // Gắn sự kiện nhấn phím (KeyDown) cho ô nhập liệu txtInput
+            if (btnNewChat != null)
+            {
+                btnNewChat.Click += (s, e) =>
+                {
+                    _chatHistory.Clear();
+                    pnlMain.Controls.Clear();
+                    _fileDinhKemTen = null;
+                    _fileDinhKemNoiDung = null;
+                    _fileDinhKemPath = null;
+                    if (btnOcr != null)
+                    {
+                        btnOcr.Text = "➕ File";
+                        btnOcr.FillColor = Color.FromArgb(64, 64, 64);
+                    }
+                    ThemTinNhan("💬 Đã khởi tạo cuộc trò chuyện mới!", false);
+                };
+            }
 
             // Load ảnh logo cho PictureBox bằng code (tránh lỗi Designer)
             try
@@ -619,12 +637,16 @@ namespace SEMI_FINAL // Bắt đầu namespace của ứng dụng
                         HienThiDialogNhapApiKey(true);
                         return;
                     }
-                    traLoi = await _geminiService.GuiTinNhan(cauHoiGuiAI, imagePath); // Đẩy yêu cầu qua internet tới Google API
+                    traLoi = await _geminiService.GuiTinNhan(cauHoiGuiAI, imagePath, _chatHistory); // Đẩy yêu cầu qua internet tới Google API kèm lịch sử
                 }
                 else // Nếu model là Local (Llama, mistral...)
                 {
-                    traLoi = await _ollamaService.GuiTinNhan(cauHoiGuiAI, imagePath); // Đẩy yêu cầu tới port 11434 của localhost Ollama
+                    traLoi = await _ollamaService.GuiTinNhan(cauHoiGuiAI, imagePath, _chatHistory); // Đẩy yêu cầu tới port 11434 của localhost Ollama kèm lịch sử
                 }
+
+                // Lưu lại lượt thoại vào lịch sử ngữ cảnh
+                _chatHistory.Add(new ChatMessage { Role = "user", Content = cauHoiGuiAI, ImagePath = imagePath });
+                _chatHistory.Add(new ChatMessage { Role = "assistant", Content = traLoi });
 
                 if (lblIndicator != null && pnlMain.Controls.Contains(lblIndicator)) // Kiểm tra xem cái bong bóng giả kia còn trên màn ko
                 {

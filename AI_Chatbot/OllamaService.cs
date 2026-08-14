@@ -67,63 +67,88 @@ namespace SEMI_FINAL // Namespace nhóm các class trong project lại
             }
         }
 
-        public async Task<string> GuiTinNhan(string tinNhan, string imagePath = null) // Hàm để gửi chat và hình ảnh (nếu có) lên Ollama AI
+        public async Task<string> GuiTinNhan(string tinNhan, string imagePath = null, List<ChatMessage> history = null) // Hàm để gửi chat và hình ảnh (nếu có) lên Ollama AI
         {
-            string noiDungGuiDi = tinNhan; // Tạo bản sao cho tin nhắn đầu vào
-            if (noiDungGuiDi.Length > MAX_CONTENT_LENGTH) // Nếu độ dài vượt ngưỡng cho phép 8000 ký tự
+            var messagesList = new List<object>();
+            
+            // 1. Thêm System Prompt cố định chỉ định Tiếng Việt
+            messagesList.Add(new { role = "system", content = "You are a helpful AI assistant. You MUST ALWAYS respond entirely in Vietnamese language (Tiếng Việt). Never use English in your responses, even if the user's prompt is in English. Translate any analysis to Vietnamese." });
+
+            // 2. Thêm lịch sử hội thoại trước đó (nếu có)
+            if (history != null && history.Count > 0)
             {
-                noiDungGuiDi = noiDungGuiDi.Substring(0, MAX_CONTENT_LENGTH) // Cắt chuỗi, giữ 8000 ký tự đầu
-                    + $"\n\n[... Nội dung đã bị cắt bớt do quá dài ({tinNhan.Length} ký tự, giới hạn {MAX_CONTENT_LENGTH}) ...]"; // Gắn thêm thông báo bị cắt bớt ở đuôi
+                foreach (var msg in history)
+                {
+                    string contentMsg = msg.Content;
+                    if (contentMsg.Length > MAX_CONTENT_LENGTH)
+                    {
+                        contentMsg = contentMsg.Substring(0, MAX_CONTENT_LENGTH) + "\n[... cắt bớt ...]";
+                    }
+
+                    if (!string.IsNullOrEmpty(msg.ImagePath) && File.Exists(msg.ImagePath))
+                    {
+                        byte[] imgBytes = File.ReadAllBytes(msg.ImagePath);
+                        string base64 = Convert.ToBase64String(imgBytes);
+                        messagesList.Add(new { role = msg.Role, content = contentMsg, images = new[] { base64 } });
+                    }
+                    else
+                    {
+                        messagesList.Add(new { role = msg.Role, content = contentMsg });
+                    }
+                }
             }
 
-            object messageObject; // Biến vô danh chứa cấu trúc tin nhắn để truyền json
-            if (!string.IsNullOrEmpty(imagePath) && File.Exists(imagePath)) // Trường hợp người dùng có truyền ảnh
+            // 3. Thêm tin nhắn hiện tại của người dùng
+            string noiDungGuiDi = tinNhan;
+            if (noiDungGuiDi.Length > MAX_CONTENT_LENGTH)
             {
-                byte[] imageBytes = File.ReadAllBytes(imagePath); // Load toàn bộ byte ảnh
-                string base64Image = Convert.ToBase64String(imageBytes); // Đổi byte thành chuỗi Base64
-                messageObject = new { role = "user", content = noiDungGuiDi, images = new[] { base64Image } }; // Khởi tạo payload chuẩn của Ollama vision có kèm biến image
-            }
-            else // Trường hợp không có hình ảnh
-            {
-                messageObject = new { role = "user", content = noiDungGuiDi }; // Khởi tạo payload Ollama chuẩn nhưng loại bỏ hình ảnh
+                noiDungGuiDi = noiDungGuiDi.Substring(0, MAX_CONTENT_LENGTH) 
+                    + $"\n\n[... Nội dung đã bị cắt bớt do quá dài ({tinNhan.Length} ký tự, giới hạn {MAX_CONTENT_LENGTH}) ...]";
             }
 
-            var requestBody = new // Bao bọc nội dung vào body JSON 
+            if (!string.IsNullOrEmpty(imagePath) && File.Exists(imagePath))
             {
-                model = _model, // Tên mô hình sẽ xử lý
-                messages = new object[] // Tạo mảng tin nhắn
-                { 
-                    new { role = "system", content = "You are a helpful AI assistant. You MUST ALWAYS respond entirely in Vietnamese language (Tiếng Việt). Never use English in your responses, even if the user's prompt is in English. Translate any analysis to Vietnamese." }, // Hệ thống tự nhúng thêm System Prompt chỉ định tiếng Việt để tránh AI xài tiếng Anh
-                    messageObject // Tin nhắn của người dùng
-                },
-                stream = false // Vô hiệu hóa stream để AI nhận đủ response rồi mới nhả JSON
+                byte[] imageBytes = File.ReadAllBytes(imagePath);
+                string base64Image = Convert.ToBase64String(imageBytes);
+                messagesList.Add(new { role = "user", content = noiDungGuiDi, images = new[] { base64Image } });
+            }
+            else
+            {
+                messagesList.Add(new { role = "user", content = noiDungGuiDi });
+            }
+
+            var requestBody = new 
+            {
+                model = _model,
+                messages = messagesList,
+                stream = false
             };
 
-            try // Bọc các xử lý liên quan kết nối HTTP
+            try
             {
-                string jsonBody = JsonConvert.SerializeObject(requestBody); // Đóng gói dữ liệu đối tượng sang dạng string JSON
-                var content = new StringContent(jsonBody, Encoding.UTF8, "application/json"); // Chuẩn bị StringContent UTF8 với type JSON
+                string jsonBody = JsonConvert.SerializeObject(requestBody);
+                var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
 
-                var response = await _httpClient.PostAsync($"{_baseUrl}/api/chat", content); // Thực thi HTTP Post lên URL của API chat Ollama
+                var response = await _httpClient.PostAsync($"{_baseUrl}/api/chat", content);
 
-                if (!response.IsSuccessStatusCode) // Xử lý nếu mã trạng thái khác 200
+                if (!response.IsSuccessStatusCode)
                 {
-                    string errorBody = await response.Content.ReadAsStringAsync(); // Lấy message chi tiết từ server
-                    throw new Exception($"Ollama trả về lỗi {(int)response.StatusCode}: {errorBody}"); // Đẩy exception báo lỗi
+                    string errorBody = await response.Content.ReadAsStringAsync();
+                    throw new Exception($"Ollama trả về lỗi {(int)response.StatusCode}: {errorBody}");
                 }
 
-                string jsonResponse = await response.Content.ReadAsStringAsync(); // Trích xuất chuỗi trả lời sau khi thành công
+                string jsonResponse = await response.Content.ReadAsStringAsync();
 
-                var obj = JObject.Parse(jsonResponse); // Deserialize JSON thành cây dạng từ điển
-                return obj["message"]?["content"]?.ToString() ?? "Không có phản hồi."; // Tìm đường dẫn tới nội dung văn bản và xử lý nếu nó rỗng
+                var obj = JObject.Parse(jsonResponse);
+                return obj["message"]?["content"]?.ToString() ?? "Không có phản hồi.";
             }
-            catch (TaskCanceledException) // Bắt lỗi HTTP timeout
+            catch (TaskCanceledException)
             {
-                throw new Exception($"Hết thời gian chờ (timeout 10 phút). Model '{_model}' xử lý quá lâu — thử dùng model lớn hơn hoặc rút ngắn nội dung."); // Thông báo dễ đọc cho người dùng về timeout
+                throw new Exception($"Hết thời gian chờ (timeout 10 phút). Model '{_model}' xử lý quá lâu — thử dùng model lớn hơn hoặc rút ngắn nội dung.");
             }
-            catch (HttpRequestException ex) // Bắt lỗi mạng hoặc server đóng kết nối
+            catch (HttpRequestException ex)
             {
-                throw new Exception($"Không thể kết nối Ollama ({_baseUrl}).\nNguyên nhân: {ex.Message}\n\nGợi ý: Ollama đang load model mới — hãy chờ 10-30 giây rồi thử lại."); // Thông báo và gợi ý
+                throw new Exception($"Không thể kết nối Ollama ({_baseUrl}).\nNguyên nhân: {ex.Message}\n\nGợi ý: Ollama đang load model mới — hãy chờ 10-30 giây rồi thử lại.");
             }
         }
 

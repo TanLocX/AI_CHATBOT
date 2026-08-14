@@ -1,4 +1,5 @@
 using System; // Cung cấp các hàm cơ sở, ngoại lệ và hệ thống kiểu dữ liệu
+using System.Collections.Generic; // Hỗ trợ tập hợp Generic như List<T>
 using System.Net.Http; // Hỗ trợ khởi tạo HttpClient để gọi các API HTTP/HTTPS
 using System.Text; // Hỗ trợ xử lý bảng mã ký tự, đặc biệt dùng khi đẩy JSON lên server
 using System.Threading.Tasks; // Cung cấp lớp Task hỗ trợ lập trình bất đồng bộ (async/await)
@@ -32,61 +33,80 @@ namespace SEMI_FINAL // Phạm vi chung của toàn bộ class trong dự án
             _apiKey = newKey;
         }
 
-        public async Task<string> GuiTinNhan(string tinNhan, string imagePath = null) // Phương thức gửi câu hỏi dạng chuỗi và ảnh tùy chọn
+        public async Task<string> GuiTinNhan(string tinNhan, string imagePath = null, List<ChatMessage> history = null) // Phương thức gửi câu hỏi dạng chuỗi và ảnh tùy chọn
         {
             if (tinNhan.Length > 30000) // Kiểm tra nếu độ dài tin nhắn vượt quá 30.000 ký tự (tránh lỗi quá dung lượng)
             {
-                tinNhan = tinNhan.Substring(0, 30000) + "\n\n[... Nội dung đã bị cắt bớt do quá dài ...]"; // Trích xuất và giới hạn lại số lượng ký tự tối đa
+                tinNhan = tinNhan.Substring(0, 30000) + "\n\n[... Nội dung đã bị cắt bớt do quá dài ...]";
             }
 
-            string url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=" + _apiKey; // Cấu trúc đường dẫn URL API Gemini gắn với khóa bí mật
-            
-            object requestBody; // Khai báo đối tượng chứa các thành phần cấu trúc payload body
+            string url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=" + _apiKey;
 
-            if (!string.IsNullOrEmpty(imagePath) && File.Exists(imagePath)) // Trường hợp người dùng có đính kèm file và file tồn tại thực sự
+            var contentsList = new List<object>();
+
+            // 1. Thêm lịch sử hội thoại trước đó (nếu có)
+            if (history != null && history.Count > 0)
             {
-                byte[] imageBytes = File.ReadAllBytes(imagePath); // Đọc nội dung file ảnh vào mảng byte
-                string base64Image = Convert.ToBase64String(imageBytes); // Chuyển đổi dữ liệu byte của ảnh sang dạng chuỗi Base64
-                string mimeType = GetMimeType(imagePath); // Gọi hàm để xác định định dạng Mime-Type (ví dụ image/png)
+                foreach (var msg in history)
+                {
+                    string geminiRole = (msg.Role == "assistant") ? "model" : "user";
+                    string msgText = msg.Content;
+                    if (msgText.Length > 30000) msgText = msgText.Substring(0, 30000);
 
-                requestBody = new // Khởi tạo payload body có chứa ảnh cho Gemini API
-                {
-                    contents = new[] // Khởi tạo mảng content theo chuẩn Gemini
+                    if (!string.IsNullOrEmpty(msg.ImagePath) && File.Exists(msg.ImagePath))
                     {
-                        new // Khởi tạo item thứ nhất
+                        byte[] imgBytes = File.ReadAllBytes(msg.ImagePath);
+                        string base64 = Convert.ToBase64String(imgBytes);
+                        string mime = GetMimeType(msg.ImagePath);
+
+                        contentsList.Add(new
                         {
-                            parts = new object[] // Mảng parts phải chứa cả text và inline_data cho image
+                            role = geminiRole,
+                            parts = new object[]
                             {
-                                new { text = tinNhan }, // Đối tượng chứa nội dung chữ người dùng truyền vào
-                                new // Đối tượng cấu trúc dữ liệu ảnh nội tuyến
-                                {
-                                    inline_data = new // Định nghĩa dữ liệu ảnh nội tuyến
-                                    {
-                                        mime_type = mimeType, // Khai báo định dạng cho ảnh
-                                        data = base64Image // Gắn mã Base64 vừa mã hóa
-                                    }
-                                }
+                                new { text = msgText },
+                                new { inline_data = new { mime_type = mime, data = base64 } }
                             }
-                        }
+                        });
                     }
-                };
+                    else
+                    {
+                        contentsList.Add(new
+                        {
+                            role = geminiRole,
+                            parts = new object[] { new { text = msgText } }
+                        });
+                    }
+                }
             }
-            else // Trường hợp chỉ chat văn bản thuần, không có ảnh
+
+            // 2. Thêm tin nhắn hiện tại
+            if (!string.IsNullOrEmpty(imagePath) && File.Exists(imagePath))
             {
-                requestBody = new // Khởi tạo payload body chỉ chứa text
+                byte[] imageBytes = File.ReadAllBytes(imagePath);
+                string base64Image = Convert.ToBase64String(imageBytes);
+                string mimeType = GetMimeType(imagePath);
+
+                contentsList.Add(new
                 {
-                    contents = new[] // Khởi tạo mảng nội dung
+                    role = "user",
+                    parts = new object[]
                     {
-                        new // Khởi tạo item trong mảng nội dung
-                        {
-                            parts = new[] // Mảng các bộ phận (parts) của tin nhắn
-                            {
-                                new { text = tinNhan } // Truyền câu hỏi của người dùng vào biến text
-                            }
-                        }
+                        new { text = tinNhan },
+                        new { inline_data = new { mime_type = mimeType, data = base64Image } }
                     }
-                };
+                });
             }
+            else
+            {
+                contentsList.Add(new
+                {
+                    role = "user",
+                    parts = new object[] { new { text = tinNhan } }
+                });
+            }
+
+            object requestBody = new { contents = contentsList };
 
             string jsonBody = JsonConvert.SerializeObject(requestBody); // Biến object vô danh C# trở thành chuỗi JSON tiêu chuẩn
             var content = new StringContent(jsonBody, Encoding.UTF8, "application/json"); // Đóng gói chuỗi JSON đó thành HTTP Body có định danh utf-8
