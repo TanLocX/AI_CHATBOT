@@ -1,0 +1,105 @@
+MỤC LỤC DEVELOPER GUIDE
+DỰ ÁN: FLUENTCHAT AI STUDIO - DESKTOP ASSISTANT
+
+Chương 1. Giới thiệu
+1.1. Giới thiệu bài toán
+Trong bối cảnh kỷ nguyên số và sự bùng nổ của Trí tuệ Nhân tạo (AI), các công cụ trợ lý ảo (Chatbot) đang ngày càng trở thành một phần không thể thiếu trong học tập, công việc và đời sống hằng ngày. Tuy nhiên, phần lớn các công cụ AI hiện nay (như ChatGPT, Claude) đều hoạt động trên nền tảng Web, đòi hỏi phải luôn có kết nối Internet liên tục, và tiềm ẩn nguy cơ về bảo mật dữ liệu khi người dùng phải tải các tài liệu nội bộ, nhạy cảm lên máy chủ của bên thứ ba.
+
+Mặt khác, các mô hình AI chạy cục bộ (Local AI) tuy đảm bảo được tính riêng tư và bảo mật tuyệt đối nhưng lại thường đòi hỏi kỹ thuật cài đặt phức tạp, giao diện dòng lệnh (Terminal/CMD) khô khan và thiếu thân thiện với người dùng phổ thông. Bên cạnh đó, nhu cầu của người dùng không chỉ dừng lại ở việc chat văn bản đơn thuần, mà họ còn cần một công cụ có khả năng "đọc hiểu" trực tiếp các tài liệu (Word, PDF) và phân tích hình ảnh (OCR/Vision) một cách nhanh chóng.
+
+Từ những thực tiễn trên, bài toán đặt ra là cần xây dựng một ứng dụng Desktop cá nhân tích hợp Trí tuệ Nhân tạo, sở hữu giao diện đồ họa (GUI) hiện đại, trực quan, dễ thao tác. Ứng dụng này cần giải quyết được bài toán về sự linh hoạt: vừa có khả năng tận dụng sức mạnh vượt trội của AI đám mây (Cloud LLM) khi có mạng, vừa cho phép kết nối và xử lý thông tin bằng các mô hình AI cục bộ (Local LLM) ngay trên phần cứng máy tính mà không cần Internet, nhằm mang lại một môi trường làm việc thông minh và bảo mật tối đa.
+1.2. Mục tiêu ứng dụng
+Mục tiêu cốt lõi của dự án là thiết kế và phát triển thành công ứng dụng FluentChat AI Studio - một trợ lý ảo cá nhân chạy độc lập trên nền tảng Desktop (Windows), đáp ứng các tiêu chí cụ thể sau:
+
+- Về mặt công nghệ: Xây dựng thành công cầu nối (API Integration) giữa ứng dụng Desktop truyền thống với các hệ sinh thái Trí tuệ Nhân tạo hiện đại. Bao gồm việc giao tiếp mượt mà với mô hình ngôn ngữ lớn cục bộ (Local LLM) thông qua nền tảng Ollama và mô hình đám mây (Cloud LLM) thông qua Google Gemini API.
+- Về mặt tiện ích xử lý dữ liệu: Ứng dụng không chỉ đóng vai trò là một Chatbot thông thường mà phải là một công cụ xử lý đa phương tiện (Multimodal). Ứng dụng phải có khả năng bóc tách, "đọc hiểu" đa dạng các định dạng tài liệu (Word, PDF, Text, Mã nguồn...) và nhận diện chữ viết từ hình ảnh cục bộ (OCR), từ đó cung cấp ngữ cảnh chính xác cho AI phân tích.
+- Về mặt Trải nghiệm người dùng (UX/UI): Xóa bỏ giao diện khô cứng của WinForms cổ điển bằng ngôn ngữ thiết kế Fluent Design hiện đại. Tối ưu hóa trải nghiệm tương tác với hệ thống bong bóng chat (Chat Bubbles) tự động co giãn, tích hợp tính năng sao chép thông minh, và khả năng hiển thị định dạng văn bản (Markdown Rendering) giúp câu trả lời của AI trở nên trực quan, dễ đọc.
+- Về mặt triển khai: Ứng dụng hướng tới sự tiện dụng tối đa, tự động hóa các thao tác kỹ thuật phức tạp (như tự động khởi chạy ngầm máy chủ Ollama, tự động tải mô hình), giúp người dùng phổ thông có thể trải nghiệm AI ngay lập tức mà không cần thiết lập dòng lệnh.
+1.3. Các chức năng chính
+
+Chương 2. Kiến thức nền
+2.1. Kiến thức về API và RESTful Services (Google Gemini, Ollama)
+2.2. Xử lý dữ liệu định dạng JSON (Newtonsoft.Json)
+2.3. Lập trình bất đồng bộ trong C# (async/await, Task)
+2.4. Công nghệ nhận diện ký tự quang học (Tesseract OCR)
+2.5. Xử lý I/O và cấu trúc tệp tin (File, Compression, PdfPig)
+
+Chương 3. Chuẩn bị môi trường
+3.1. Cài đặt Visual Studio và .NET Framework (WinForms)
+3.2. Quản lý và cài đặt các NuGet Package (Guna.UI2.WinForms, Tesseract, EPPlus...)
+3.3. Cài đặt và cấu hình máy chủ Ollama Local
+3.4. Khởi tạo và thiết lập Google Gemini API Key
+
+Chương 4. Thiết kế giao diện
+4.1. Mô tả giao diện tổng quan (Fluent Design)
+4.2. Giải thích chức năng từng thành phần (TextBox, Chat Bubbles, Guna2Panel)
+4.3. Hình minh họa giao diện chính và các Dialog
+
+Chương 5. Hướng dẫn thực hiện
+5.1. Bước 1. Khởi tạo Project và cấu hình App.config
+5.2. Bước 2. Cài đặt các thư viện NuGet cần thiết
+5.3. Bước 3. Thiết kế giao diện (Form1, FormApiKeyDialog, FormDownloadModelDialog)
+5.4. Bước 4. Viết mã nguồn
+    5.4.1. Lập trình các Services kết nối AI (OllamaService, GeminiService)
+    5.4.2. Lập trình các Services xử lý tệp tin (DocumentReaderService, OcrService)
+    5.4.3. Xử lý logic hiển thị giao diện (Parse Markdown, Chat Auto-Scroll)
+5.5. Bước 5. Xây dựng kịch bản kiểm thử (Kiểm thử kết nối, đọc file, nhận diện ảnh)
+
+Chương 6. Những lỗi thường gặp và cách khắc phục
+6.1. Lỗi không thể kết nối tới máy chủ Ollama (Timeout, Connection Refused)
+6.2. Lỗi xác thực và giới hạn của Gemini API (Invalid Key, Quota Exceeded)
+6.3. Lỗi thư viện Tesseract OCR không hoạt động (Thiếu thư mục tessdata)
+6.4. Lỗi định dạng khi giải nén tài liệu Word hoặc đọc PDF
+
+Chương 7. Hướng phát triển
+7.1. Các chức năng có thể mở rộng (Lưu lịch sử chat, Text-to-Speech)
+7.2. Khả năng tích hợp vào các phần mềm quản lý (Hệ thống quản lý tài liệu doanh nghiệp)
+7.3. Các công nghệ có thể bổ sung trong tương lai (Tích hợp RAG, Vector Database)
+
+
+
+Dưới đây là gợi ý chi tiết các vị trí bạn nên chèn ảnh (Screenshot) tương ứng với từng chương:
+
+  Chương 1. Giới thiệu
+
+  • Mục 1.2 hoặc 1.3: Chèn 1 hình ảnh tổng quan chụp lại toàn bộ màn hình ứng dụng lúc đang hoạt động hoàn hảo (đang chat với AI, có      
+  bong bóng chat nhiều màu sắc, giao diện đẹp) để gây ấn tượng ngay từ đầu cho người đọc.
+
+  Chương 2. Kiến thức nền
+
+  • Mục 2.1 (API): Chèn ảnh sơ đồ nguyên lý hoạt động của API (Client gửi Request, Server trả về Response JSON). Bạn có thể tự vẽ một     
+  sơ đồ đơn giản.
+  • Mục 2.4 (OCR): Chèn 1 hình ảnh minh họa cách Tesseract quét qua một bức ảnh chứa chữ và trích xuất ra văn bản.
+
+  Chương 3. Chuẩn bị môi trường
+
+  • Mục 3.2 (NuGet Packages): Chụp ảnh màn hình cửa sổ NuGet Package Manager trong Visual Studio đang hiển thị danh sách các thư viện     
+  đã cài đặt (Guna.UI2, Tesseract, PdfPig,...).
+  • Mục 3.3 (Ollama): Chụp ảnh màn hình cửa sổ Terminal (Command Prompt) màu đen khi đang chạy lệnh ollama serve hoặc lúc đang tải        
+  model.
+  • Mục 3.4 (Gemini API): Chụp ảnh màn hình trang web Google AI Studio nơi bạn tạo và copy đoạn mã API Key.
+
+  Chương 4. Thiết kế giao diện (Chương chứa nhiều ảnh nhất)
+
+  • Mục 4.1: Chụp toàn bộ giao diện Form1 khi đang ở chế độ thiết kế (Design View) trong Visual Studio.
+  • Mục 4.2: Chụp cận cảnh từng thành phần và cửa sổ Properties (Ví dụ: chụp góc bo tròn của Guna2Panel, chụp ô nhập liệu, nút gửi).      
+  • Mục 4.3: Chụp ảnh các Form phụ (Form cấu hình API Key, Form tải Model local).
+
+  Chương 5. Hướng dẫn thực hiện
+
+  • Xen kẽ ở Bước 4 (Viết mã nguồn): Mặc dù copy text mã nguồn là chính, nhưng bạn có thể chụp 1-2 bức ảnh cấu trúc cây thư mục
+  (Solution Explorer) để người đọc biết bạn tổ chức các file Service.cs nằm ở đâu.
+  • Mục 5.5 (Kiểm thử): Chụp các ảnh chứng minh ứng dụng chạy thành công:
+      • Ảnh ứng dụng giải nén và đọc thành công 1 file PDF/Word dài.
+      • Ảnh AI phản hồi chính xác bằng Tiếng Việt.
+      • Ảnh quét OCR trích xuất thành công chữ từ ảnh.
+
+
+  Chương 6. Những lỗi thường gặp
+
+  • Mục 6.1 đến 6.4: Bất cứ khi nào bạn chạy test mà bị văng lỗi, hãy cố tình chụp lại các hộp thoại cảnh báo (MessageBox lỗi màu
+  đỏ/vàng) như: "Không thể tự khởi động Ollama", "Vui lòng nhập API Key", hoặc màn hình Visual Studio báo lỗi Exception đỏ chót. Những    
+  ảnh này làm minh chứng rất tốt cho cách khắc phục lỗi.
+
+  Nếu bạn có sẵn các hình chụp này, khi viết báo cáo, bạn chỉ cần ném chúng vào đúng các mục trên là bài báo cáo sẽ cực kỳ thuyết phục    
+  và dễ hiểu! Bạn có cần tôi hỗ trợ viết chi tiết văn bản cho các chương này luôn không?

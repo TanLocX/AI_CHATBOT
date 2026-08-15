@@ -1,0 +1,41 @@
+6. Developer Guide (Hướng dẫn triển khai) (Bắt buộc)
+Đây là tài liệu quan trọng nhất của bài tập.
+Mục tiêu của tài liệu là:
+Một sinh viên khác chưa từng nghiên cứu chủ đề này có thể đọc tài liệu và tự xây
+dựng lại ứng dụng.
+YÊU CẦU ĐỐI VỚI DEVELOPER GUIDE
+Tài liệu cần trình bày rõ ràng theo từng bước.
+Nội dung tối thiểu
+Chương 1. Giới thiệu
+ Giới thiệu bài toán.
+ Mục tiêu ứng dụng.
+ Các chức năng chính.
+Chương 2. Kiến thức nền
+Giới thiệu các kiến thức liên quan.
+Ví dụ: Timer, File, Process, API, JSON, QR Code, OCR, HTTP Request.
+Chương 3. Chuẩn bị môi trường
+Bao gồm:
+ Visual Studio
+ .NET Framework/.NET
+ Các NuGet Package cần cài đặt
+ Các API cần sử dụng (nếu có)
+Chương 4. Thiết kế giao diện
+ Mô tả giao diện.
+ Giải thích chức năng từng thành phần.
+ Hình minh họa.
+Chương 5. Hướng dẫn thực hiện
+Trình bày theo từng bước.
+Ví dụ:
+ Bước 1. Tạo Project.
+ Bước 2. Thiết kế Form.
+ Bước 3. Cài đặt Package.
+ Bước 4. Viết mã nguồn.
+ Bước 5. Kiểm thử.
+Chương 6. Những lỗi thường gặp
+Ví dụ: Lỗi cài Package, Lỗi API, Lỗi đọc File, Lỗi quyền truy cập, Nguyên nhân và
+cách khắc phục.
+Chương 7. Hướng phát triển
+Đề xuất:
+ Chức năng có thể mở rộng.
+ Khả năng tích hợp vào các phần mềm quản lý.
+ Các công nghệ có thể bổ sung trong tương lai. 
