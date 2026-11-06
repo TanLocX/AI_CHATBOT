@@ -1,49 +1,59 @@
-# AI Chat Assistant 🤖
+# FluentChat AI Studio 🤖
+*(AI Desktop Assistant - C# WinForms)*
 
-Một ứng dụng Desktop Chatbot AI hỗ trợ Tiếng Việt được viết bằng C# (WinForms), kết hợp sức mạnh của **Local AI (Ollama)** và **Cloud AI (Google Gemini)**. 
-
-Ngoài ra, ứng dụng còn tích hợp:
-- 📎 **Đọc hiểu tài liệu**: Word, PDF, Text, CSV, JSON, Markdown...
-- 🖼️ **OCR & Vision AI**: Trích xuất chữ từ hình ảnh (offline qua Tesseract) hoặc phân tích/xuất dữ liệu bảng biểu ra file Excel tự động (qua Gemini).
+Một ứng dụng Desktop Chatbot AI hỗ trợ Tiếng Việt được viết bằng **C# WinForms (.NET Framework 4.7.2)**, kết hợp sức mạnh của **Local AI (Ollama)** và **Cloud AI (Google Gemini)**.
 
 ---
 
-## 🚀 Hướng dẫn cài đặt cho người mới tải về
+## ⚡ LỰA CHỌN 1: Dành Cho Người Dùng ("Tải Về Là Dùng Ngay")
 
-Khi bạn clone (tải) repository này về máy, hãy làm theo các bước cực kỳ đơn giản sau để thiết lập:
+Nếu bạn chỉ muốn sử dụng phần mềm mà không cần cài Visual Studio hay biên dịch code:
 
-### Bước 1: Cấu hình API Key (Để dùng Google Gemini)
-Do lý do bảo mật, API Key không được đẩy lên GitHub. Bạn cần tự điền key của riêng mình:
+1. **Tải bản Portable:**
+   - Tải file nén **`AI_Chatbot_Portable_v1.0.zip`** (tại mục [Releases](../../releases) của repository hoặc thư mục `dist/`).
+2. **Giải nén:**
+   - Giải nén file `.zip` vào bất kỳ thư mục nào trên máy tính.
+3. **Chạy ứng dụng:**
+   - Nhấp đúp vào file **`AI_Chatbot.exe`** để mở ứng dụng ngay lập tức!
 
-1. Trong thư mục `AI_Chatbot`, bạn sẽ thấy một file tên là **`secrets.config.example`**.
-2. **Copy** file đó và đổi tên bản copy thành **`secrets.config`**.
-3. Mở file `secrets.config` vừa tạo.
-4. Đăng nhập [Google AI Studio](https://aistudio.google.com/apikey) để lấy API Key miễn phí.
-5. Thay thế dòng `DIEN_API_KEY_CUA_BAN_VAO_DAY` bằng API Key của bạn:
-   ```xml
-   <add key="GeminiApiKey" value="AIzaSyB_Ví_Dụ_Mã_Key_Của_Bạn..." />
-   ```
+> [!TIP]
+> - **Dùng Cloud AI (Google Gemini):** Nhấn vào nút **[🔑 Cấu hình API Key]** ở góc dưới bên trái màn hình, dán API Key miễn phí từ [Google AI Studio](https://aistudio.google.com/apikey) và bấm Lưu.
+> - **Dùng Local AI (Ollama):** Cài đặt [Ollama](https://ollama.com/download) và chạy `ollama run llama3.2`. Ứng dụng sẽ tự động kết nối ngầm.
+> - **OCR Nhận diện chữ:** Thư mục `tessdata` (tiếng Việt + tiếng Anh) đã được tích hợp sẵn, bạn chỉ việc bấm nút `➕ File` và chọn ảnh để quét chữ offline.
 
-*(Lưu ý: File `secrets.config` đã được đưa vào `.gitignore` nên API Key của bạn được an toàn tuyệt đối).*
+---
 
-### Bước 2: Cài đặt Ollama (Để dùng AI Offline tại máy)
-1. Tải và cài đặt [Ollama](https://ollama.com/download) cho Windows.
-2. Mở Command Prompt (cmd) hoặc PowerShell và gõ lệnh tải mô hình (ví dụ Llama 3.2):
+## 🛠️ LỰA CHỌN 2: Dành Cho Lập Trình Viên (Mã Nguồn & Phát Triển)
+
+Nếu bạn muốn chỉnh sửa, phát triển thêm tính năng hoặc tự build:
+
+### 1. Yêu cầu môi trường
+- Hệ điều hành: Windows 10/11
+- Công cụ: **Visual Studio 2019 hoặc 2022** (.NET Desktop Development)
+- .NET Framework 4.7.2 SDK
+
+### 2. Mở và Biên dịch dự án
+1. Clone hoặc tải mã nguồn về máy:
    ```bash
-   ollama run llama3.2
+   git clone <URL_REPO>
    ```
-*(Khi bạn mở ứng dụng C#, phần mềm sẽ tự động bật Ollama ngầm ở background).*
+2. Mở file **`AI_Chatbot.sln`** (hoặc `AI_Chatbot.slnx` nếu dùng VS 2022 v17.10+) bằng Visual Studio.
+3. Chuột phải vào Solution -> chọn **Restore NuGet Packages** (hoặc dùng lệnh `nuget restore AI_Chatbot.sln`).
+4. Nhấn **F5** (hoặc Ctrl + F5) để chạy.
 
-### Bước 3: Build và Chạy
-1. Mở file `SEMI_FINAL.sln` bằng **Visual Studio** (khuyên dùng 2019 trở lên).
-2. Khi mở lần đầu, Visual Studio có thể yêu cầu **Restore NuGet Packages** (tải các thư viện như Guna UI2, PdfPig, EPPlus...). Hãy nhấn đồng ý (hoặc click chuột phải vào Solution -> chọn *Restore NuGet Packages*).
-3. Nhấn nút **Start (F5)** để chạy.
+### 3. Đóng gói bản Portable tự động
+Dự án đã tích hợp sẵn script tự động hóa toàn bộ việc Restore -> Build Release -> Tải dữ liệu OCR -> Nén file ZIP:
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\build_portable.ps1
+```
+File ZIP đầu ra sẽ nằm tại: `dist\AI_Chatbot_Portable_v1.0.zip`.
 
 ---
 
-## 🛠️ Công nghệ sử dụng
-- **.NET Framework 4.7.2** & C# WinForms
-- **Guna UI2**: Thiết kế giao diện hiện đại (Dark Mode)
-- **Tesseract OCR**: Quét chữ offline
-- **EPPlus**: Thao tác và xuất file Excel
-- **Newtonsoft.Json**: Phân tích dữ liệu JSON
+## 🌟 Các Tính Năng Nổi Bật
+
+- 💬 **Đa mô hình AI linh hoạt:** Chuyển đổi mượt mà giữa AI Offline (Ollama - Llama 3.2, Mistral, Qwen...) và AI Online (Google Gemini 2.5 Flash).
+- 📎 **Đọc hiểu tài liệu đa định dạng:** Word (`.docx`), PDF (`.pdf`), Excel (`.xlsx`), Text (`.txt`), CSV, JSON, Markdown.
+- 🖼️ **OCR Offline (Tesseract 5.2):** Trích xuất chữ tiếng Việt và tiếng Anh từ hình ảnh không cần kết nối mạng.
+- 📊 **Vision AI & Xuất Excel:** Tự động phát hiện cấu trúc bảng biểu trong ảnh và xuất ra file Excel định dạng chuẩn qua EPPlus.
+- 🎨 **Giao diện hiện đại (Fluent Dark UI):** Thiết kế tối ưu bằng thư viện Guna.UI2, hỗ trợ hiệu ứng hiển thị Markdown, code block đẹp mắt.

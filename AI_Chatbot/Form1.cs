@@ -28,6 +28,7 @@ namespace SEMI_FINAL // Bắt đầu namespace của ứng dụng
         private string _fileDinhKemNoiDung = null; // Biến lưu nội dung chữ trích xuất từ file đính kèm
         private string _fileDinhKemPath = null; // Biến lưu đường dẫn vật lý của file đính kèm
         private bool _dangChoAI = false; // Cờ khóa trạng thái để tránh spam gửi nhiều tin nhắn cùng lúc khi AI đang xử lý
+        private bool _dangKhoiTaoModel = false; // Cờ tránh trigger sự kiện đổi model khi đang load danh sách
         private List<ChatMessage> _chatHistory = new List<ChatMessage>(); // Bộ nhớ ngữ cảnh cuộc trò chuyện
 
         public Form1() // Hàm khởi tạo UI của Form1
@@ -92,17 +93,9 @@ namespace SEMI_FINAL // Bắt đầu namespace của ứng dụng
 
                         await Task.Delay(3000); // Tạm dừng luồng hiện tại 3 giây để chờ server Ollama kịp load lên
                     }
-                    catch // Bắt mọi lỗi xảy ra khi gọi Process.Start
+                    catch // Bắt mọi lỗi xảy ra khi gọi Process.Start (chưa cài Ollama)
                     {
-                        MessageBox.Show( // Hiển thị popup thông báo lỗi cho người dùng
-                            "Không thể tự khởi động Ollama.\n\n" + // Thông báo dòng 1
-                            "Hãy mở Command Prompt và chạy:\n" + // Hướng dẫn dòng 2
-                            "   ollama serve\n\n" + // Lệnh chạy thủ công
-                            "Sau đó khởi động lại ứng dụng.", // Hướng dẫn bước cuối
-                            "Ollama chưa chạy", // Tiêu đề popup
-                            MessageBoxButtons.OK, // Nút OK
-                            MessageBoxIcon.Warning); // Icon cảnh báo màu vàng
-                        return; // Kết thúc hàm sớm nếu lỗi
+                        ThemTinNhan("ℹ️ Chưa phát hiện dịch vụ Ollama cục bộ. Nếu muốn dùng Local AI (offline), hãy cài Ollama từ https://ollama.com. Bạn có thể sử dụng Cloud AI (Gemini) ngay bây giờ.", false);
                     }
                 }
                 else // Nếu có tiến trình ollama nhưng chưa ping được
@@ -111,12 +104,12 @@ namespace SEMI_FINAL // Bắt đầu namespace của ứng dụng
                 }
             }
 
-            KiemTraKetNoiOllama(); // Gọi hàm kiểm tra lại một lần nữa
             TaiDanhSachModel(); // Gọi hàm tự động lấy các model đang có trong Ollama
         }
 
         private async void TaiDanhSachModel() // Hàm tải danh sách các LLM từ Ollama về combobox
         {
+            _dangKhoiTaoModel = true; // Bật cờ khởi tạo
             cb_model.Enabled = false; // Tạm khóa combobox model để người dùng không click lúc đang tải
             cb_model.Items.Clear(); // Xóa toàn bộ dữ liệu cũ trong combobox
             cb_model.Items.Add("⏳ Đang tải..."); // Thêm mục "Đang tải" làm placeholder
@@ -141,13 +134,32 @@ namespace SEMI_FINAL // Bắt đầu namespace của ứng dụng
 
             string currentModel = "llama3.2"; // Đặt model mặc định mong muốn là llama3.2
             int idx = models.FindIndex(m => m.StartsWith(currentModel)); // Tìm index của model này trong danh sách tải về
-            cb_model.SelectedIndex = idx >= 0 ? idx : 0; // Nếu tìm thấy thì set chọn, không thì chọn mục đầu tiên (index 0)
+            
+            if (idx >= 0)
+            {
+                cb_model.SelectedIndex = idx;
+                _isGeminiSelected = false;
+                _ollamaService.SetModel(models[idx]);
+            }
+            else if (models.Count == 0 && _geminiService.HasKey)
+            {
+                int geminiIdx = cb_model.Items.IndexOf("Gemini 2.5 Flash");
+                cb_model.SelectedIndex = geminiIdx >= 0 ? geminiIdx : 0;
+                _isGeminiSelected = true;
+            }
+            else
+            {
+                cb_model.SelectedIndex = 0;
+                _isGeminiSelected = false;
+            }
 
             cb_model.Enabled = true; // Mở khóa lại combobox cho người dùng chọn
+            _dangKhoiTaoModel = false; // Tắt cờ khởi tạo
         }
 
         private void cboModel_SelectedIndexChanged(object sender, EventArgs e) // Sự kiện khi người dùng đổi model trong combobox
         {
+            if (_dangKhoiTaoModel) return; // Nếu đang trong quá trình nạp danh sách thì không xử lý sự kiện
             string selected = cb_model.SelectedItem?.ToString(); // Lấy tên model vừa được chọn
             if (string.IsNullOrEmpty(selected) || selected.StartsWith("⏳")) // Bỏ qua nếu là placeholder
                 return; // Thoát hàm

@@ -46,3 +46,7 @@ SEMI_FINAL/ollama_data/
 *.gguf
 ollama.exe
 
+# Build and Distribution staging
+dist/
+
+

@@ -46,7 +46,7 @@ namespace SEMI_FINAL // Phạm vi chung của toàn bộ class trong dự án
             }
         }
 
-        public async Task<string> GuiTinNhan(string tinNhan, string imagePath = null) // Phương thức gửi câu hỏi dạng chuỗi và ảnh tùy chọn
+        public async Task<string> GuiTinNhan(string tinNhan, string imagePath = null, List<ChatMessage> history = null) // Phương thức gửi câu hỏi dạng chuỗi và ảnh tùy chọn
         {
             if (tinNhan.Length > 30000) // Kiểm tra nếu độ dài tin nhắn vượt quá 30.000 ký tự (tránh lỗi quá dung lượng)
             {
@@ -89,7 +89,22 @@ namespace SEMI_FINAL // Phạm vi chung của toàn bộ class trong dự án
 
             if (!isOcr)
             {
-                currentContents.AddRange(_chatHistory);
+                if (history != null && history.Count > 0)
+                {
+                    foreach (var msg in history)
+                    {
+                        string gRole = msg.Role == "assistant" ? "model" : "user";
+                        currentContents.Add(new
+                        {
+                            role = gRole,
+                            parts = new[] { new { text = msg.Content ?? "" } }
+                        });
+                    }
+                }
+                else
+                {
+                    currentContents.AddRange(_chatHistory);
+                }
                 currentContents.Add(userMessage);
             }
             else

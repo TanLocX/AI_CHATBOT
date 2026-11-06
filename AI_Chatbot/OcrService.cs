@@ -19,7 +19,22 @@ namespace SEMI_FINAL // Khai báo không gian tên SEMI_FINAL cho toàn bộ d�
             if (!File.Exists(imagePath)) // Kiểm tra xem file ảnh có tồn tại trên đĩa hay không
                 throw new FileNotFoundException("Không tìm thấy file ảnh.", imagePath); // Quăng lỗi nếu không tìm thấy file
 
-            using (var engine = new TesseractEngine(_tessDataPath, "vie+eng", EngineMode.Default)) // Khởi tạo bộ nhận diện Tesseract cho tiếng Việt và Anh, dùng 'using' để tự giải phóng tài nguyên
+            if (!Directory.Exists(_tessDataPath))
+            {
+                throw new DirectoryNotFoundException($"Không tìm thấy thư mục dữ liệu OCR '{_tessDataPath}'. Vui lòng đảm bảo thư mục 'tessdata' nằm cùng cấp với file chạy ứng dụng.");
+            }
+
+            bool hasVie = File.Exists(Path.Combine(_tessDataPath, "vie.traineddata"));
+            bool hasEng = File.Exists(Path.Combine(_tessDataPath, "eng.traineddata"));
+
+            if (!hasVie && !hasEng)
+            {
+                throw new FileNotFoundException("Không tìm thấy dữ liệu ngôn ngữ (vie.traineddata hoặc eng.traineddata) trong thư mục tessdata. Vui lòng bổ sung file traineddata để sử dụng OCR offline.");
+            }
+
+            string lang = (hasVie && hasEng) ? "vie+eng" : (hasVie ? "vie" : "eng");
+
+            using (var engine = new TesseractEngine(_tessDataPath, lang, EngineMode.Default)) // Khởi tạo bộ nhận diện Tesseract, dùng 'using' để tự giải phóng tài nguyên
             {
                 using (var img = Pix.LoadFromFile(imagePath)) // Tải hình ảnh vào đối tượng Pix (của thư viện Tesseract)
                 {
